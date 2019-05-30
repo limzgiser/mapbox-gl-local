@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8' />
+    <title>Display a map</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.0/mapbox-gl.js'>
+    </script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.0/mapbox-gl.css'
+     rel='stylesheet' />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id='map'></div>
+    <script>
+        let style = {
+            "version": 8,
+            "name": "sz_style_1",
+            "metadata": {
+                "mapbox:autocomposite": true,
+                "mapbox:type": "template",
+                "mapbox:sdk-support": {
+                    "js": "0.50.0",
+                    "android": "6.7.0",
+                    "ios": "4.6.0"
+                }
+            },
+            "center": [120.74198506635548, 31.288156043477372],
+            "zoom": 14.52406124567372,
+            "bearing": -12.967904356845565,
+            "pitch": 14,
+            "sources": {
+                "composite": {
+                    "type": "vector",
+                    "scheme": "tms",
+                    "tiles": [
+                        "http://localhost:8080/geoserver/gwc/service/" +
+                        "tms/1.0.0/test%3Asz_shp@EPSG%3A900913@pbf/{z}/{x}/{y}.pbf"
+                    ]
+                }
+            },
+            "sprite": "http://localhost:8081/resource/sprite",
+            "glyphs": "./resource/fonts/{fontstack}/{range}.pbf",
+            "layers": [{
+                    "id": "background",
+                    "type": "background",
+                    "paint": {
+                        "background-color": "#f0e9e0"
+                    }
+                },
+                // {
+                //     "id": "py-build",
+                //     "type": "fill",
+                //     "source": "composite",
+                //     "source-layer": "PY_Build",
+                //     "minzoom": 12,
+                //     "layout": {},
+                //     "paint": {
+                //         "fill-outline-color": "hsl(0, 23%, 89%)",
+                //         "fill-opacity": 1,
+                //         "fill-color": "#dcd9d6"
+                //     }
+                // },
+                {
+                    "id": "py-sx",
+                    "type": "fill",
+                    "source": "composite",
+                    "source-layer": "PY_SX",
+                    "layout": {},
+                    "paint": {
+                        "fill-color": "#5ad0f5"
+                    }
+                },
+                {
+                    "id": "l-road",
+                    "type": "line",
+                    "source": "composite",
+                    "source-layer": "L_Road",
+                    "layout": {},
+                    "paint": {
+                        "line-color": "#ffffff",
+                        "line-width": 2
+                    }
+                },
+                {
+                    "id": "p-gl",
+                    "type": "symbol",
+                    "source": "composite",
+                    "source-layer": "P_GL",
+                    "layout": {
+                        "icon-image": "bus-11",
+                        "text-field": ["to-string", ["get", "STOP_NAME"]],
+                        "text-font": [
+                            //"Alegreya SC Bold",
+                            "Arial Unicode MS Regular"
+                        ],
+                        "text-size": 12,
+                        "text-justify": "left",
+                        "text-anchor": "left",
+                        "text-offset": [1, 0]
+                    },
+                    "paint": {
+                        "text-color": "hsl(0, 27%, 55%)"
+                    }
+                },
+                {
+                    "id": "l-road-mark",
+                    "type": "symbol",
+                    "source": "composite",
+                    "source-layer": "L_Road",
+                    "layout": {
+                        "text-field": ["to-string", ["get", "LABEL_NAME"]],
+                        "text-size": [
+                            "interpolate",
+                            ["linear"],
+                            ["zoom"],
+                            0,
+                            12,
+                            22,
+                            12
+                        ],
+                        "text-font": [
+                            "Open Sans Regular",
+                            // "Arial Unicode MS Regular"
+                        ],
+                        "symbol-placement": "line-center"
+                    },
+                    "paint": {
+                        "text-halo-color": "hsl(0, 44%, 49%)",
+                        "text-color": "hsl(0, 73%, 63%)"
+                    }
+                },
+            ],
+            "created": "2019-05-23T02:23:59.446Z",
+            "id": "cjw018ptw0bxw1cqfj2eqaky6",
+            "modified": "2019-05-28T02:02:16.770Z",
+            "owner": "limzgiser",
+            "visibility": "public",
+            "draft": false
+        }
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: style, // 这里需要JSON对象，json地址貌似不行
+        });
+        map.on('load', function () {
+            map.addLayer({
+                'id': 'buildinds',
+                'source': 'composite',
+                'source-layer': 'PY_Build',
+                'type': 'fill-extrusion',
+                "minzoom": 15,
+                'paint': {
+                    'fill-extrusion-color': [
+                        'interpolate',
+                        ['linear'],
+                        ['get', 'ZTYKGD'],
+                        0, 'rgb(255,255,191)',
+                        75, 'rgb(253,174,97)',
+                        150, "rgb(215,25,28)",
+                    ],
+                    'fill-extrusion-height': [
+                        "interpolate", ["linear"],
+                        ["zoom"],
+                        15, 0,
+                        15.05, ["get", "ZTYKGD"]
+                    ],
+                    'fill-extrusion-opacity': 1
+                }
+            });
+
+        })
+    </script>
+
+</body>
+
+</html>
